@@ -1,5 +1,4 @@
-/* globals GOM_SERVER, use, Logger, Async.HttpClient, USER_AGENT, */
-/* globals gomProxy, $, jQuery, document, netscape, alert, window */
+/* globals use, Logger, $, jQuery */
 
 /*
  * This gom-client is compatiable with Y60 and browser environments.
@@ -8,8 +7,6 @@
  *      * y60inBrowser
  *      * jQuery
  *      * jsgom2
- *
- * TODO: merge with Android gom-proxy
  *
  */
 
@@ -23,9 +20,9 @@ var Gom = (function (global) {
     };
 
     Gom.SCRIPT_RUNNER_PATH = "/gom/script-runner";
-    Gom.ENVIRONMENT = (function () {
+    Gom.ENVIRONMENT = (function (){
         if (typeof(Async) !== "undefined") {
-            return "Y60";
+            return "y60";
         } else if (typeof(jQuery) === "function") {
             return "jQuery";
         } else {
@@ -33,84 +30,53 @@ var Gom = (function (global) {
         }
     }());
 
-    Gom.prototype.retrieve = function () {
-    };
 
-    return Gom;
-}(this));
-
-
-var GLOBALS = GLOBALS || this;
-
-var gom = (function () {
-    var _ = {};
-    var that = {};
-
-    // Environment Checks
-    var Y60 = typeof(Async) !== "undefined";
-    var JQ = typeof(jQuery) === "function";
-
-    _.GOM_SCRIPT_RUNNER_PATH = "/gom/script-runner";
-    
     /////////////////////
     // Private Members //
     /////////////////////
 
-    _.send = function(theOpts) {
-        if(Y60) {
+    Gom.prototype._send = function (theOpts) {
+        if(this.ENVIRONMENT === "y60") {
             new Async.HttpClient(theOpts);
         }
 
-        if(JQ) {
-            // disable jQuerys automatic json parse in responses
-            theOpts.processData = false;
+        if(this.ENVIRONMENT === "jQuery") {
             $.ajax(theOpts);
         }
     };
 
-    _.server = function() {
-        if(Y60) {
-            return GLOBALS.host.gom_root;
-        }
-
-        if(JQ) {
-            return window.host.gom_root;
-        }
-    };
-
-    _.getRequest = function(thePath, theOpts) {
-        theOpts.url = _.server() + thePath + "?format=json";
+    Gom.prototype._getRequest = function (thePath, theOpts) {
+        theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "GET";
 
-        _.send(theOpts);
+        this._send(theOpts);
     };
 
-    _.deleteRequest = function(thePath, theOpts) {
-        theOpts.url = _.server() + thePath + "?format=json";
+    Gom.prototype._deleteRequest = function (thePath, theOpts) {
+        theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "DELETE";
 
-        _.send(theOpts);
+        this._send(theOpts);
     };
 
-    _.putRequest = function(thePath, theOpts) {
-        theOpts.url = _.server() + thePath + "?format=json";
+    Gom.prototype._putRequest = function (thePath, theOpts) {
+        theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "PUT";
 
-        _.send(theOpts);
+        this._send(theOpts);
     };
 
-    _.postRequest = function(thePath, theOpts) {
-        theOpts.url = _.server() + thePath + "?format=json";
+    Gom.prototype._postRequest = function (thePath, theOpts) {
+        theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "POST";
 
         theOpts.headers = { "X-Requested-With": "XMLHttpRequest" };
 
-        _.send(theOpts);
+        this._send(theOpts);
     };
 
-    // Wraps error handles to invoke 'success' in case of status 201 & 303 for post requests.
-    _.setRedirectHandling = function(theOpts) {
 
+    Gom.prototype._setRedirectHandling = function (theOpts) {
         var originalSuccess = null;
         if ("success" in theOpts)
             originalSuccess = theOpts.success;
@@ -120,7 +86,7 @@ var gom = (function () {
             originalError = theOpts.error;
 
         theOpts.success = function(data, code, xhr) {
-            Logger.trace("_.setRedirectHandling error\n" + data + "\n" + typeof code + "\n" + xhr);
+            Logger.trace("_setRedirectHandling error\n" + data + "\n" + typeof code + "\n" + xhr);
 
             if(((xhr.status === 201) || (xhr.status === 303)) && xhr.getResponseHeader("Location")) {
                 if(originalSuccess) {
@@ -135,7 +101,7 @@ var gom = (function () {
         };
     };
 
-    _.writePayload = function(theInput) {
+    Gom.prototype._writePayload = function (theOpts) {
         var payload = "<?xml version='1.0' encoding='UTF-8'?><node>";
         for (var attrName in theInput) {
             payload += "<attribute name='" + attrName + "'><![CDATA[" + theInput[attrName] + "]]></attribute>";
@@ -145,7 +111,7 @@ var gom = (function () {
         return payload;
     };
 
-    _.validateOpts = function (theOpts) {
+    Gom.prototype._validateOpts = function (theOpts) {
         theOpts = theOpts || {};
 
         if (!("async" in theOpts)) {
@@ -156,128 +122,101 @@ var gom = (function () {
         return theOpts;
     };
 
-    _.addJSONParseOnSuccess = function (theOpts) {
+    Gom.prototype._addJSONParseOnSuccess = function (theOpts) {
         // parse and deliver as JSON object
 
         var originalSuccess = theOpts.success;
         if(originalSuccess) {
             theOpts.success = function(data, code, response) {
-                //var contentType = response.getResponseHeader("Content-Type");
-
-                // <<<< not good, re-think! 
-                var contentType = "application/json";
-                try{
-                    contentType = response.getResponseHeader("Content-Type");
-                }
-                catch(ex){
-                    Logger.info("--->>>>> The Response headers are undefined: " + ex);
-                }
-                // >>>>
-
                 // if the content type starts with 'application/json'
-                if(Y60)
-                {
-                    if(contentType.indexOf("application/json") === 0) {
-                        originalSuccess(JSON.parse(data));
-                    }
-                    else {
-                        originalSuccess(data);
-                    }
+                if(contentType.indexOf("application/json") === 0) {
+                    originalSuccess(JSON.parse(response.responseText));
                 }
-                else
-                {
-                    if(contentType.indexOf("application/json") === 0) {
-                        originalSuccess(JSON.parse(response.responseText));
-                    }
-                    else {
-                        originalSuccess(response.responseText);
-                    }
+                else {
+                    originalSuccess(response.responseText);
                 }
             };
         }
     };
-    
+
     ////////////////////
     // Public Methods //
-    ////////////////////        
+    ////////////////////
 
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
     // theOpts['params']  : object containing additional parameters for the script.
     // theScript          : The JavaScript script to be executed.
-    that.run_script= function(theScript, theOpts) {
-        Logger.trace("------> enter run_script");
-
-        var myOpts = _.validateOpts(theOpts);
+    Gom.prototype.run_script= function(theScript, theOpts) {
+        var myOpts = this._validateOpts(theOpts);
         myOpts.data = theScript;
         myOpts.contentType = "text/javascript";
 
-        _.addJSONParseOnSuccess(myOpts);
-        _.postRequest(_.GOM_SCRIPT_RUNNER_PATH, myOpts);
+        this._addJSONParseOnSuccess(myOpts);
+        this._postRequest(this.SCRIPT_RUNNER_PATH, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
-    that.create = function(thePath, theOpts) {
-        var myOpts = _.validateOpts(theOpts);
+    Gom.prototype.create = function(thePath, theOpts) {
+        var myOpts = this._validateOpts(theOpts);
 
         // prepare attributes
         var myAttributes = "";
         if ("attributes" in myOpts) {
-
-            myOpts.data = _.writePayload(myOpts.attributes);
+            myOpts.data = this._writePayload(myOpts.attributes);
             myOpts.contentType = "application/xml";
         }
 
-        _.setRedirectHandling(myOpts);
-        _.postRequest(thePath, myOpts);
+        this._setRedirectHandling(myOpts);
+        this._postRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
-    that.retrieve = function(thePath, theOpts) {
-        var myOpts = _.validateOpts(theOpts);
-        _.addJSONParseOnSuccess(myOpts);
+    Gom.prototype.retrieve = function(thePath, theOpts) {
+        var myOpts = this._validateOpts(theOpts);
+        this._addJSONParseOnSuccess(myOpts);
 
-        _.getRequest(thePath, myOpts);
+        this._getRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
-    that.update = function (thePath, theValue, theOpts) {
+    Gom.prototype.update = function (thePath, theValue, theOpts) {
         var myPayload;
         if ((thePath.indexOf(":") >= 0)) { // isAttribute
             myPayload = '<?xml version="1.0" encoding="UTF-8"?><attribute type="string"><![CDATA[' + theValue + ']]></attribute>';
         } else {
-            myPayload = _.writePayload(theValue);
+            myPayload = this._writePayload(theValue);
         }
 
-        var myOpts = _.validateOpts(theOpts);
+        var myOpts = this._validateOpts(theOpts);
         myOpts.data = myPayload;
         myOpts.contentType = "application/xml";
 
-        _.putRequest(thePath, myOpts);
+        this._putRequest(thePath, myOpts);
     };
-        
+
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
-    that.destroy = function (thePath, theOpts) {
-        var myOpts = _.validateOpts(theOpts);
+    Gom.prototype.destroy = function (thePath, theOpts) {
+        var myOpts = this._validateOpts(theOpts);
 
-        _.deleteRequest(thePath, myOpts);
+        this._deleteRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
     // theOpts['name']   : string (optional) - if a name is set a defined observer is updated or created, otherwise an observer will be created dynamically
-    that.register_observer = function(thePath, theCallback_url, theOpts) {
-        var myOpts = _.validateOpts(theOpts);
+    Gom.prototype.register_observer = function(thePath, theCallback_url, theOpts) {
+        var myOpts = this._validateOpts(theOpts);
 
         // ensure format is set, default: application/json
         if (!("format" in myOpts)) {
@@ -293,28 +232,28 @@ var gom = (function () {
 
             data.observer_uri = myPath;
             myOpts.data = JSON.stringify(data);
-            that.update("/gom/observer" + myPath + "/." + myOpts.name, data, myOpts);
+            this.update("/gom/observer" + myPath + "/." + myOpts.name, data, myOpts);
         }
         else {
             // if no name is set create an observer at a dynamicly given location
             myOpts.data = JSON.stringify(data);
 
-            _.setRedirectHandling(myOpts);
-            _.postRequest("/gom/observer" + thePath, myOpts);
+            this._setRedirectHandling(myOpts);
+            this._postRequest("/gom/observer" + thePath, myOpts);
         }
     };
 
     // theCallbacks['success']: callback(string) is called on success providing own address.
     // theCallbacks['error']   : callback(error_obj, status) is called upon error.
-    that.determineIpAddress = function (theCallbacks) {
-        that.retrieve("/gom/config/connection", theCallbacks);
+    Gom.prototype.determineIpAddress = function (theCallbacks) {
+        this.retrieve("/gom/config/connection", theCallbacks);
     };
 
     /////////////////////
     // Utility methods //
     ///////////////////// 
-    
-    that.parseDate = function (dateString) {
+
+    Gom.prototype.parseDate = function (dateString) {
         // gom delivers this:       "2009-08-18T18:24:39+02:00"
         // js can only parse this:  "2009/08/20 13:03:38 +0200"
         // so we have to cut & glue strings
@@ -323,18 +262,6 @@ var gom = (function () {
         dateString.substr(19, 6).replace(/:/, "");
         return new Date(Date.parse(parsableDate));
     };
-    
-    var pub = {
-        retrieve   : that.retrieve,
-        update     : that.update,
-        destroy    : that.destroy,
-        create     : that.create,
-        register_observer : that.register_observer,
-        run_script : that.run_script,
-        parseTime  : that.parseDate,
-        parseDate  : that.parseDate,
-        determineIpAddress : that.determineIpAddress
-    };
-    
-    return pub;
-}());
+
+    return Gom;
+}(this));
