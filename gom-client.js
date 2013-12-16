@@ -101,10 +101,10 @@ var Gom = (function (global) {
         };
     };
 
-    Gom.prototype._writePayload = function (theOpts) {
+    Gom.prototype._writePayload = function (theAttributes) {
         var payload = "<?xml version='1.0' encoding='UTF-8'?><node>";
-        for (var attrName in theInput) {
-            payload += "<attribute name='" + attrName + "'><![CDATA[" + theInput[attrName] + "]]></attribute>";
+        for (var attrName in theAttributes) {
+            payload += "<attribute name='" + attrName + "'><![CDATA[" + theAttributes[attrName] + "]]></attribute>";
         }
         payload += "</node>";
 
@@ -128,9 +128,12 @@ var Gom = (function (global) {
         var originalSuccess = theOpts.success;
         if(originalSuccess) {
             theOpts.success = function(data, code, xhr) {
+Logger.trace("_addJSONParseOnSuccess::success");
+
                 // if the content type starts with 'application/json'
                 var contentType = xhr.getResponseHeader("Content-Type") || "";
                 if(contentType.indexOf("application/json") === 0) {
+                    Logger.trace("_addJSONParseOnSuccess::parse");
                     originalSuccess(JSON.parse(xhr.responseText));
                 }
                 else {
