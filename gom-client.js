@@ -36,11 +36,11 @@ var Gom = (function (global) {
     /////////////////////
 
     Gom.prototype._send = function (theOpts) {
-        if(this.ENVIRONMENT === "y60") {
+        if(Gom.ENVIRONMENT === "y60") {
             new Async.HttpClient(theOpts);
         }
 
-        if(this.ENVIRONMENT === "jQuery") {
+        if(Gom.ENVIRONMENT === "jQuery") {
             $.ajax(theOpts);
         }
     };
@@ -127,13 +127,14 @@ var Gom = (function (global) {
 
         var originalSuccess = theOpts.success;
         if(originalSuccess) {
-            theOpts.success = function(data, code, response) {
+            theOpts.success = function(data, code, xhr) {
                 // if the content type starts with 'application/json'
+                var contentType = xhr.getResponseHeader("Content-Type") || "";
                 if(contentType.indexOf("application/json") === 0) {
-                    originalSuccess(JSON.parse(response.responseText));
+                    originalSuccess(JSON.parse(xhr.responseText));
                 }
                 else {
-                    originalSuccess(response.responseText);
+                    originalSuccess(xhr.responseText);
                 }
             };
         }
@@ -154,7 +155,7 @@ var Gom = (function (global) {
         myOpts.contentType = "text/javascript";
 
         this._addJSONParseOnSuccess(myOpts);
-        this._postRequest(this.SCRIPT_RUNNER_PATH, myOpts);
+        this._postRequest(Gom.SCRIPT_RUNNER_PATH, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
