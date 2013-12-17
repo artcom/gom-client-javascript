@@ -1,4 +1,4 @@
-/* globals use, Logger, $, jQuery */
+/* globals $, Async, jQuery, Logger, use */
 
 /*
  * This gom-client is compatiable with Y60 and browser environments.
