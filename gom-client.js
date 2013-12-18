@@ -10,7 +10,7 @@
  *
  */
 
-var Gom = (function (global) {
+(function (global) {
     "use strict";
 
     use("lib/json2.js");
@@ -78,12 +78,14 @@ var Gom = (function (global) {
 
     Gom.prototype._setRedirectHandling = function (theOpts) {
         var originalSuccess = null;
-        if ("success" in theOpts)
+        if ("success" in theOpts) {
             originalSuccess = theOpts.success;
+        }
 
         var originalError = null;
-        if ("error" in theOpts)
+        if ("error" in theOpts) {
             originalError = theOpts.error;
+        }
 
         theOpts.success = function(data, code, xhr) {
             Logger.trace("_setRedirectHandling error\n" + data + "\n" + typeof code + "\n" + xhr);
@@ -94,8 +96,7 @@ var Gom = (function (global) {
                 }
             } else {
                 if (originalError) {
-                    originalError({ error_obj : xhr,
-                        status    : xhr.status.toString()});
+                    originalError(xhr, xhr.status.toString());
                 }
             }
         };
@@ -128,8 +129,6 @@ var Gom = (function (global) {
         var originalSuccess = theOpts.success;
         if(originalSuccess) {
             theOpts.success = function(data, code, xhr) {
-Logger.trace("_addJSONParseOnSuccess::success");
-
                 // if the content type starts with 'application/json'
                 var contentType = xhr.getResponseHeader("Content-Type") || "";
                 if(contentType.indexOf("application/json") === 0) {
@@ -152,7 +151,7 @@ Logger.trace("_addJSONParseOnSuccess::success");
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
     // theOpts['params']  : object containing additional parameters for the script.
     // theScript          : The JavaScript script to be executed.
-    Gom.prototype.run_script= function(theScript, theOpts) {
+    Gom.prototype.runScript= function(theScript, theOpts) {
         var myOpts = this._validateOpts(theOpts);
         myOpts.data = theScript;
         myOpts.contentType = "text/javascript";
@@ -168,7 +167,6 @@ Logger.trace("_addJSONParseOnSuccess::success");
         var myOpts = this._validateOpts(theOpts);
 
         // prepare attributes
-        var myAttributes = "";
         if ("attributes" in myOpts) {
             myOpts.data = this._writePayload(myOpts.attributes);
             myOpts.contentType = "application/xml";
@@ -194,7 +192,7 @@ Logger.trace("_addJSONParseOnSuccess::success");
     Gom.prototype.update = function (thePath, theValue, theOpts) {
         var myPayload;
         if ((thePath.indexOf(":") >= 0)) { // isAttribute
-            myPayload = '<?xml version="1.0" encoding="UTF-8"?><attribute type="string"><![CDATA[' + theValue + ']]></attribute>';
+            myPayload = "<?xml version='1.0' encoding='UTF-8'?><attribute type='string'><![CDATA[" + theValue + "]]></attribute>";
         } else {
             myPayload = this._writePayload(theValue);
         }
@@ -219,7 +217,7 @@ Logger.trace("_addJSONParseOnSuccess::success");
     // theOpts['error']   : callback(error_obj, status) is called upon error.
     // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
     // theOpts['name']   : string (optional) - if a name is set a defined observer is updated or created, otherwise an observer will be created dynamically
-    Gom.prototype.register_observer = function(thePath, theCallback_url, theOpts) {
+    Gom.prototype.registerObserver = function(thePath, theCallbackUrl, theOpts) {
         var myOpts = this._validateOpts(theOpts);
 
         // ensure format is set, default: application/json
@@ -228,7 +226,7 @@ Logger.trace("_addJSONParseOnSuccess::success");
         }
         myOpts.contentType = "application/json";
 
-        var data = {callback_url: theCallback_url, accept: myOpts.format};
+        var data = { callback_url: theCallbackUrl, accept: myOpts.format };
 
         if ("name" in myOpts) {
             // if a name exists update or create   
@@ -267,5 +265,5 @@ Logger.trace("_addJSONParseOnSuccess::success");
         return new Date(Date.parse(parsableDate));
     };
 
-    return Gom;
+    global.Gom = Gom;
 }(this));
