@@ -251,19 +251,5 @@
         this.retrieve("/gom/config/connection", theCallbacks);
     };
 
-    /////////////////////
-    // Utility methods //
-    ///////////////////// 
-
-    Gom.prototype.parseDate = function (dateString) {
-        // gom delivers this:       "2009-08-18T18:24:39+02:00"
-        // js can only parse this:  "2009/08/20 13:03:38 +0200"
-        // so we have to cut & glue strings
-        var parsableDate = dateString.substr(0, 10).replace(/-/g, "/") +
-                           " " + dateString.substr(11, 8) + " ";
-        dateString.substr(19, 6).replace(/:/, "");
-        return new Date(Date.parse(parsableDate));
-    };
-
     global.Gom = Gom;
 }(this));
