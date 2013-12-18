@@ -1,0 +1,22 @@
+{
+  "name": "gom-client-javascript",
+  "version": "0.2.0",
+  "description": "JavaScript GOM Client",
+  "main": "gom-client.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/artcom/gom-client-javascript.git"
+  },
+  "author": "ART+COM AG",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/artcom/gom-client-javascript/issues"
+  },
+  "homepage": "https://github.com/artcom/gom-client-javascript"
+}
