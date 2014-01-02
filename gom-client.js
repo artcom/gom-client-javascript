@@ -4,9 +4,9 @@
  * This gom-client is compatiable with Y60 and browser environments.
  * It supersedes the gom-client.js in cortex and gom.
  * When used in a browser context, be sure to also include
+ *      * Logger
  *      * y60inBrowser
  *      * jQuery
- *      * jsgom2
  *
  */
 
@@ -26,7 +26,7 @@
         } else if (typeof(jQuery) === "function") {
             return "jQuery";
         } else {
-            return "unknown";
+            Logger.fatal("No HTTP Client found (could be jQuery or Async.HttpClient)");
         }
     }());
 
