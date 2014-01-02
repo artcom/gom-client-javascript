@@ -1,4 +1,4 @@
-/* globals $, Async, jQuery, Logger, use */
+/* globals Async, jQuery, Logger, use */
 
 /*
  * This gom-client is compatiable with Y60 and browser environments.
@@ -10,7 +10,9 @@
  *
  */
 
-(function (global) {
+define([
+    "jquery"
+], function (jQuery) {
     "use strict";
 
     use("lib/json2.js");
@@ -23,10 +25,8 @@
     Gom.ENVIRONMENT = (function (){
         if (typeof(Async) !== "undefined") {
             return "y60";
-        } else if (typeof(jQuery) === "function") {
-            return "jQuery";
         } else {
-            Logger.fatal("No HTTP Client found (could be jQuery or Async.HttpClient)");
+            return "jQuery";
         }
     }());
 
@@ -41,7 +41,7 @@
         }
 
         if(Gom.ENVIRONMENT === "jQuery") {
-            $.ajax(theOpts);
+            jQuery.ajax(theOpts);
         }
     };
 
@@ -251,5 +251,5 @@
         this.retrieve("/gom/config/connection", theCallbacks);
     };
 
-    global.Gom = Gom;
-}(this));
+    return Gom;
+});
