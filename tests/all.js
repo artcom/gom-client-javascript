@@ -1,5 +1,4 @@
-/* globals after, afterEach, before, beforeEach, define, describe, GomClient, it */
-/*  */
+/* globals define */
 
 define([
     "gom-client",
@@ -7,30 +6,34 @@ define([
     "intern/chai!expect",
     "intern/order!../lib/y60inBrowser.js",
     "intern/order!../lib/logger.js"
-], function (Gom, bdd, expect, $) {
-    with (bdd) {
-        describe("GOM Client", function () {
-            var gom,
-                testNode = "/test/gom-client-javascript-" + Date.now(),
-                testAttribute = testNode + ":attribute-" + Date.now();
+], function (Gom, bdd, expect) {
+    var afterEach = bdd.afterEach,
+        before = bdd.before,
+        beforeEach = bdd.beforeEach,
+        describe = bdd.describe,
+        it = bdd.it;
 
-            before(function () {
-                gom = new Gom("http://192.168.56.101:3080");
-            });
+    describe("GOM Client", function () {
+        var gom,
+            testNode = "/test/gom-client-javascript-" + Date.now(),
+            testAttribute = testNode + ":attribute-" + Date.now();
 
-            beforeEach(function () {
-                return gom.update(testAttribute, "initial");
-            });
+        before(function () {
+            gom = new Gom("http://gom.staging.t-gallery");
+        });
 
-            afterEach(function () {
-                return gom.destroy(testNode);
-            });
+        beforeEach(function () {
+            return gom.update(testAttribute, "initial");
+        });
 
-            it("can retrieve attributes", function () {
-                return gom.retrieve(testAttribute).then(function (result) {
-                    expect(result.attribute.value).to.equal("initial");
-                });
+        afterEach(function () {
+            return gom.destroy(testNode);
+        });
+
+        it("can retrieve attributes", function () {
+            return gom.retrieve(testAttribute).then(function (result) {
+                expect(result.attribute.value).to.equal("initial");
             });
         });
-    }
+    });
 });
