@@ -41,7 +41,7 @@ define([
         }
 
         if(Gom.ENVIRONMENT === "jQuery") {
-            jQuery.ajax(theOpts);
+            return jQuery.ajax(theOpts);
         }
     };
 
@@ -49,21 +49,21 @@ define([
         theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "GET";
 
-        this._send(theOpts);
+        return this._send(theOpts);
     };
 
     Gom.prototype._deleteRequest = function (thePath, theOpts) {
         theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "DELETE";
 
-        this._send(theOpts);
+        return this._send(theOpts);
     };
 
     Gom.prototype._putRequest = function (thePath, theOpts) {
         theOpts.url = this._host + thePath + "?format=json";
         theOpts.type = "PUT";
 
-        this._send(theOpts);
+        return this._send(theOpts);
     };
 
     Gom.prototype._postRequest = function (thePath, theOpts) {
@@ -72,7 +72,7 @@ define([
 
         theOpts.headers = { "X-Requested-With": "XMLHttpRequest" };
 
-        this._send(theOpts);
+        return this._send(theOpts);
     };
 
 
@@ -157,7 +157,7 @@ define([
         myOpts.contentType = "text/javascript";
 
         this._addJSONParseOnSuccess(myOpts);
-        this._postRequest(Gom.SCRIPT_RUNNER_PATH, myOpts);
+        return this._postRequest(Gom.SCRIPT_RUNNER_PATH, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
@@ -173,7 +173,7 @@ define([
         }
 
         this._setRedirectHandling(myOpts);
-        this._postRequest(thePath, myOpts);
+        return this._postRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
@@ -183,7 +183,7 @@ define([
         var myOpts = this._validateOpts(theOpts);
         this._addJSONParseOnSuccess(myOpts);
 
-        this._getRequest(thePath, myOpts);
+        return this._getRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
@@ -201,7 +201,7 @@ define([
         myOpts.data = myPayload;
         myOpts.contentType = "application/xml";
 
-        this._putRequest(thePath, myOpts);
+        return this._putRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
@@ -210,7 +210,7 @@ define([
     Gom.prototype.destroy = function (thePath, theOpts) {
         var myOpts = this._validateOpts(theOpts);
 
-        this._deleteRequest(thePath, myOpts);
+        return this._deleteRequest(thePath, myOpts);
     };
 
     // theOpts['success'] : callback(json) is called upon success.
@@ -234,21 +234,21 @@ define([
 
             data.observer_uri = myPath;
             myOpts.data = JSON.stringify(data);
-            this.update("/gom/observer" + myPath + "/." + myOpts.name, data, myOpts);
+            return this.update("/gom/observer" + myPath + "/." + myOpts.name, data, myOpts);
         }
         else {
             // if no name is set create an observer at a dynamicly given location
             myOpts.data = JSON.stringify(data);
 
             this._setRedirectHandling(myOpts);
-            this._postRequest("/gom/observer" + thePath, myOpts);
+            return this._postRequest("/gom/observer" + thePath, myOpts);
         }
     };
 
     // theCallbacks['success']: callback(string) is called on success providing own address.
     // theCallbacks['error']   : callback(error_obj, status) is called upon error.
     Gom.prototype.determineIpAddress = function (theCallbacks) {
-        this.retrieve("/gom/config/connection", theCallbacks);
+        return this.retrieve("/gom/config/connection", theCallbacks);
     };
 
     return Gom;
