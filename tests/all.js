@@ -36,16 +36,9 @@ define([
             });
         });
 
-        it("can retrieve attributes (legacy)", function () {
-            var deferred = this.async(1000);
-
-            return gom.retrieve(testAttribute, {
-                success: deferred.callback(function (result) {
-                    expect(result.attribute.value).to.equal("initial");
-                }),
-                error: function () {
-                    deferred.reject();
-                }
+        it("can update attributes", function () {
+            return gom.update(testAttribute).then(function (result) {
+                expect(result.attribute.value).to.equal("initial");
             });
         });
     });
