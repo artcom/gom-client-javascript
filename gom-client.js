@@ -1,21 +1,9 @@
-/* globals Async, jQuery, Logger, use */
-
-/*
- * This gom-client is compatiable with Y60 and browser environments.
- * It supersedes the gom-client.js in cortex and gom.
- * When used in a browser context, be sure to also include
- *      * Logger
- *      * y60inBrowser
- *      * jQuery
- *
- */
+/* globals Async, define */
 
 define([
     "jquery"
 ], function (jQuery) {
     "use strict";
-
-    use("lib/json2.js");
 
     var Gom = function (theHost) {
         this._host = theHost;
@@ -88,8 +76,6 @@ define([
         }
 
         theOpts.success = function(data, code, xhr) {
-            Logger.trace("_setRedirectHandling error\n" + data + "\n" + typeof code + "\n" + xhr);
-
             if(((xhr.status === 201) || (xhr.status === 303)) && xhr.getResponseHeader("Location")) {
                 if(originalSuccess) {
                     originalSuccess(xhr.getResponseHeader("Location"));
@@ -132,7 +118,6 @@ define([
                 // if the content type starts with 'application/json'
                 var contentType = xhr.getResponseHeader("Content-Type") || "";
                 if(contentType.indexOf("application/json") === 0) {
-                    Logger.trace("_addJSONParseOnSuccess::parse");
                     originalSuccess(JSON.parse(xhr.responseText));
                 }
                 else {

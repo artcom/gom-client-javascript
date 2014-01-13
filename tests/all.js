@@ -3,9 +3,7 @@
 define([
     "gom-client",
     "intern!bdd",
-    "intern/chai!expect",
-    "intern/order!../lib/y60inBrowser.js",
-    "intern/order!../lib/logger.js"
+    "intern/chai!expect"
 ], function (Gom, bdd, expect) {
     var afterEach = bdd.afterEach,
         before = bdd.before,
