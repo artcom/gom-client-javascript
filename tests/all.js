@@ -35,8 +35,10 @@ define([
         });
 
         it("can update attributes", function () {
-            return gom.update(testAttribute).then(function (result) {
-                expect(result.attribute.value).to.equal("initial");
+            return gom.update(testAttribute, "updated").then(function () {
+                return gom.retrieve(testAttribute);
+            }).then(function (result) {
+                expect(result.attribute.value).to.equal("updated");
             });
         });
     });
