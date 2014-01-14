@@ -41,5 +41,18 @@ define([
                 expect(result.attribute.value).to.equal("updated");
             });
         });
+
+        it("can destroy attributes", function () {
+            var deferred = this.async();
+
+            gom.destroy(testAttribute).then(function () {
+                return gom.retrieve(testAttribute);
+            }).then(function () {
+                // Retrieve is expected to fail, see below.
+                deferred.reject();
+            }).fail(deferred.callback(function (result) {
+                expect(result.status).to.equal(404);
+            }));
+        });
     });
 });
