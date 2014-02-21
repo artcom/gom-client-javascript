@@ -184,38 +184,6 @@ define([
         return this._deleteRequest(thePath, myOpts);
     };
 
-    // theOpts['success'] : callback(json) is called upon success.
-    // theOpts['error']   : callback(error_obj, status) is called upon error.
-    // theOpts['async']   : bool (default: true) - determines if the request is performed asynchronously.
-    // theOpts['name']   : string (optional) - if a name is set a defined observer is updated or created, otherwise an observer will be created dynamically
-    Gom.prototype.registerObserver = function(thePath, theCallbackUrl, theOpts) {
-        var myOpts = this._validateOpts(theOpts);
-
-        // ensure format is set, default: application/json
-        if (!("format" in myOpts)) {
-            myOpts.format = "application/json";
-        }
-        myOpts.contentType = "application/json";
-
-        var data = { callback_url: theCallbackUrl, accept: myOpts.format };
-
-        if ("name" in myOpts) {
-            // if a name exists update or create   
-            var myPath = thePath.replace(":", "/");
-
-            data.observer_uri = myPath;
-            myOpts.data = JSON.stringify(data);
-            return this.update("/gom/observer" + myPath + "/." + myOpts.name, data, myOpts);
-        }
-        else {
-            // if no name is set create an observer at a dynamicly given location
-            myOpts.data = JSON.stringify(data);
-
-            this._setRedirectHandling(myOpts);
-            return this._postRequest("/gom/observer" + thePath, myOpts);
-        }
-    };
-
     // theCallbacks['success']: callback(string) is called on success providing own address.
     // theCallbacks['error']   : callback(error_obj, status) is called upon error.
     Gom.prototype.determineIpAddress = function (theCallbacks) {
