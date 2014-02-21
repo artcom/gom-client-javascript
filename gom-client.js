@@ -1,4 +1,4 @@
-/* globals Async, define */
+/* globals define */
 
 define([
     "jquery"
@@ -10,27 +10,13 @@ define([
     };
 
     Gom.SCRIPT_RUNNER_PATH = "/gom/script-runner";
-    Gom.ENVIRONMENT = (function (){
-        if (typeof(Async) !== "undefined") {
-            return "y60";
-        } else {
-            return "jQuery";
-        }
-    }());
-
 
     /////////////////////
     // Private Members //
     /////////////////////
 
     Gom.prototype._send = function (theOpts) {
-        if(Gom.ENVIRONMENT === "y60") {
-            new Async.HttpClient(theOpts);
-        }
-
-        if(Gom.ENVIRONMENT === "jQuery") {
-            return jQuery.ajax(theOpts);
-        }
+        return jQuery.ajax(theOpts);
     };
 
     Gom.prototype._getRequest = function (thePath, theOpts) {
