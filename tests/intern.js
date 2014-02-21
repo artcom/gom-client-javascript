@@ -56,8 +56,8 @@ define({
     loader: {
         // Packages that should be registered with the loader in each testing environment
         packages: [
-            { name: "sizzle", location: "node_modules/jquery/src/sizzle/dist", main: "sizzle" },
-            { name: "jquery", location: "node_modules/jquery/src", main: "jquery" },
+            { name: "sizzle", location: "bower_components/jquery/src/sizzle/dist", main: "sizzle" },
+            { name: "jquery", location: "bower_components/jquery/src", main: "jquery" },
             { name: "gom-client-javascript", location: "." }
         ]
     },

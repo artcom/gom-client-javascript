@@ -13,16 +13,13 @@
     "type": "git",
     "url": "git://github.com/artcom/gom-client-javascript.git"
   },
-  "author": "ART+COM AG",
+  "author": "ART+COM AG <info@artcom.de>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/artcom/gom-client-javascript/issues"
   },
   "homepage": "https://github.com/artcom/gom-client-javascript",
   "devDependencies": {
-    "intern": "~1.3.2"
-  },
-  "dependencies": {
-    "jquery": "~2.1.0"
+    "intern": "~1.4.0"
   }
 }
