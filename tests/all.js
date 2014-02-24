@@ -56,5 +56,13 @@ define([
         expect(error.xhr.status).to.equal(404);
       }));
     });
+
+    it('can create unnamed, empty nodes', function () {
+      return gom.create(testNode).then(function (result) {
+        expect(result.node.uri.indexOf(testNode)).to.equal(0);
+        expect(result.node.uri).to.have.length.above(testNode.length);
+        expect(result.node.entries).to.be.empty;
+      });
+    });
   });
 });

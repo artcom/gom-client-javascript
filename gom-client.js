@@ -15,25 +15,8 @@ define([
   // Private Members //
   /////////////////////
 
-  Gom.prototype._send = function (method, path, options) {
-    var url = this._host + path + '?format=json';
-    return http.send(method, url, options);
-  };
-
-  Gom.prototype._getRequest = function (path, options) {
-    return this._send('GET', path, options);
-  };
-
-  Gom.prototype._deleteRequest = function (path, options) {
-    return this._send('DELETE', path, options);
-  };
-
-  Gom.prototype._putRequest = function (path, options) {
-    return this._send('PUT', path, options);
-  };
-
-  Gom.prototype._postRequest = function (path, options) {
-    return this._send('POST', path, options);
+  Gom.prototype._url = function (path) {
+    return this._host + path + '?format=json';
   };
 
   Gom.prototype._initializeOptions = function (options) {
@@ -64,7 +47,7 @@ define([
     options.body = script;
     options.headers['Content-Type'] = 'text/javascript';
 
-    return this._postRequest(Gom.SCRIPT_RUNNER_PATH, options);
+    return http.post(this._url(Gom.SCRIPT_RUNNER_PATH), options);
   };
 
   Gom.prototype.create = function(path, options) {
@@ -77,11 +60,17 @@ define([
       options.headers['Content-Type'] = 'application/xml';
     }
 
-    return this._postRequest(path, options);
+    var _this = this;
+
+    return http.postXhr(this._url(path), options).then(function (xhr) {
+      var newNode = xhr.getResponseHeader('Location');
+
+      return _this.retrieve(newNode);
+    });
   };
 
   Gom.prototype.retrieve = function(path, options) {
-    return this._getRequest(path, options);
+    return http.get(this._url(path), options);
   };
 
   Gom.prototype.update = function (path, value, options) {
@@ -100,11 +89,11 @@ define([
     options.body = payload;
     options.headers['Content-Type'] = 'application/xml';
 
-    return this._putRequest(path, options);
+    return http.put(this._url(path), options);
   };
 
   Gom.prototype.destroy = function (path, options) {
-    return this._deleteRequest(path, options);
+    return http.delete(this._url(path), options);
   };
 
   Gom.prototype.determineIpAddress = function () {
