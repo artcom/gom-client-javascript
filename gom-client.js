@@ -64,7 +64,11 @@ define([
   };
 
   Gom.prototype.destroy = function (path) {
-    return http.delete(this._url(path));
+    return http.delete(this._url(path)).catch(function (error) {
+      if (error.xhr.status !== 404) {
+        throw error;
+      }
+    });
   };
 
   Gom.prototype.determineIpAddress = function () {

@@ -58,6 +58,10 @@ define([
       }));
     });
 
+    it('does not fail when destroying inexistent attribute', function () {
+      return gom.destroy(testNode + ':does-not-exist');
+    });
+
     it('can retrieve nodes', function () {
       return gom.retrieve(testNode).then(function (result) {
         expect(result.node.uri).to.equal(testNode);
@@ -91,6 +95,19 @@ define([
         expect(entries[2].attribute.name).to.equal('spam');
         expect(entries[2].attribute.value).to.equal('eggs');
       });
+    });
+
+    it('can destroy nodes', function () {
+      var deferred = this.async();
+
+      gom.destroy(testNode).then(function () {
+        return gom.retrieve(testNode);
+      }).then(function () {
+        // Retrieve is expected to fail, see below.
+        deferred.reject();
+      }).catch(deferred.callback(function (error) {
+        expect(error.xhr.status).to.equal(404);
+      }));
     });
   });
 });
