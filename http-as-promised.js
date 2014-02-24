@@ -1,7 +1,9 @@
 /* globals define, Promise */
 
-define(function () {
+define(function (require) {
   'use strict';
+
+  require('es6-promise');
 
   var http = {};
 
