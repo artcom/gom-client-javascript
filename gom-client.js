@@ -33,8 +33,13 @@ define([
   };
 
   Gom.prototype._postRequest = function (path, options) {
-    // options.headers = { "X-Requested-With": "XMLHttpRequest" };
     return this._send('POST', path, options);
+  };
+
+  Gom.prototype._initializeOptions = function (options) {
+    options = options || {};
+    options.headers = options.headers || {};
+    return options;
   };
 
   Gom.prototype._writePayload = function (theAttributes) {
@@ -54,20 +59,22 @@ define([
   ////////////////////
 
   Gom.prototype.runScript = function(script, options) {
-    options = options || {};
+    options = this._initializeOptions(options);
 
     options.body = script;
-    options.headers = { 'Content-Type': 'text/javascript' };
+    options.headers['Content-Type'] = 'text/javascript';
 
     return this._postRequest(Gom.SCRIPT_RUNNER_PATH, options);
   };
 
   Gom.prototype.create = function(path, options) {
-    options = options || {};
+    options = this._initializeOptions(options);
+
+    options.headers['X-Requested-With'] = 'XMLHttpRequest';
 
     if (options.attributes) {
       options.body = this._writePayload(options.attributes);
-      options.headers = { 'Content-Type': 'application/xml' };
+      options.headers['Content-Type'] = 'application/xml';
     }
 
     return this._postRequest(path, options);
@@ -78,7 +85,7 @@ define([
   };
 
   Gom.prototype.update = function (path, value, options) {
-    options = options || {};
+    options = this._initializeOptions(options);
 
     var payload;
     if ((path.indexOf(':') >= 0)) { // isAttribute
@@ -91,7 +98,7 @@ define([
     }
 
     options.body = payload;
-    options.headers = { 'Content-Type': 'application/xml' };
+    options.headers['Content-Type'] = 'application/xml';
 
     return this._putRequest(path, options);
   };
