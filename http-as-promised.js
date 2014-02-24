@@ -12,19 +12,21 @@ define(function () {
       var xhr = new XMLHttpRequest();
       xhr.open(method, url);
 
-      xhr.onload = function() {
-        var successful =
-          xhr.status >= 200 && xhr.status < 300 ||
-          xhr.status === 304;
+      xhr.onreadystatechange = function() {
+        if (this.readyState === this.DONE) {
+          var successful =
+            this.status >= 200 && this.status < 300 ||
+            this.status === 304;
 
-        if (successful) {
-          resolve(xhr);
-        }
-        else {
-          var error = new Error(xhr.statusText);
-          error.xhr = xhr;
+          if (successful) {
+            resolve(this);
+          }
+          else {
+            var error = new Error(this.statusText);
+            error.xhr = this;
 
-          reject(error);
+            reject(error);
+          }
         }
       };
 
@@ -32,25 +34,13 @@ define(function () {
         reject(new Error('Network Error'));
       };
 
-      addHeaders(xhr, options.headers);
+      Object.keys(options.headers || {}).forEach(function (field) {
+        xhr.setRequestHeader(field, options.headers[field]);
+      });
 
-      if (options.body) {
-        xhr.send(options.body);
-      } else {
-        xhr.send();
-      }
+      xhr.send(options.body || null);
     });
   };
-
-  function addHeaders(xhr, headers) {
-    if (typeof(headers) === 'object') {
-      for (var header in headers) {
-        if (headers.hasOwnProperty(header)) {
-          xhr.setRequestHeader(header, headers[header]);
-        }
-      }
-    }
-  }
 
   http.send = function (method, url, options) {
     return http.sendXhr(method, url, options).then(function (xhr) {
