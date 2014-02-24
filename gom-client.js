@@ -19,12 +19,6 @@ define([
     return this._host + path + '?format=json';
   };
 
-  Gom.prototype._initializeOptions = function (options) {
-    options = options || {};
-    options.headers = options.headers || {};
-    return options;
-  };
-
   Gom.prototype._writePayload = function (theAttributes) {
     var payload = '<?xml version="1.0" encoding="UTF-8"?><node>';
     for (var attrName in theAttributes) {
@@ -41,22 +35,18 @@ define([
   // Public Methods //
   ////////////////////
 
-  Gom.prototype.runScript = function(script, options) {
-    options = this._initializeOptions(options);
-
-    options.body = script;
-    options.headers['Content-Type'] = 'text/javascript';
-
-    return http.post(this._url(Gom.SCRIPT_RUNNER_PATH), options);
+  Gom.prototype.runScript = function(script) {
+    return http.post(this._url(Gom.SCRIPT_RUNNER_PATH), {
+      body: script,
+      headers: { 'Content-Type': 'text/javascript' }
+    });
   };
 
-  Gom.prototype.retrieve = function(path, options) {
-    return http.get(this._url(path), options);
+  Gom.prototype.retrieve = function(path) {
+    return http.get(this._url(path));
   };
 
-  Gom.prototype.update = function (path, value, options) {
-    options = this._initializeOptions(options);
-
+  Gom.prototype.update = function (path, value) {
     var payload;
     if ((path.indexOf(':') >= 0)) { // isAttribute
       payload = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -67,14 +57,14 @@ define([
       payload = this._writePayload(value);
     }
 
-    options.body = payload;
-    options.headers['Content-Type'] = 'application/xml';
-
-    return http.put(this._url(path), options);
+    return http.put(this._url(path), {
+      body: payload,
+      headers: { 'Content-Type': 'application/xml' }
+    });
   };
 
-  Gom.prototype.destroy = function (path, options) {
-    return http.delete(this._url(path), options);
+  Gom.prototype.destroy = function (path) {
+    return http.delete(this._url(path));
   };
 
   Gom.prototype.determineIpAddress = function () {
