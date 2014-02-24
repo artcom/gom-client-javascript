@@ -61,11 +61,35 @@ define([
     it('can retrieve nodes', function () {
       return gom.retrieve(testNode).then(function (result) {
         expect(result.node.uri).to.equal(testNode);
-        expect(result.node.entries).to.have.length(1);
 
-        var attribute = result.node.entries[0];
-        expect(attribute.attribute.node).to.equal(testNode);
-        expect(attribute.attribute.value).to.equal('initial');
+        var entries = result.node.entries;
+        expect(entries).to.have.length(1);
+
+        expect(entries[0].attribute.node).to.equal(testNode);
+        expect(entries[0].attribute.value).to.equal('initial');
+      });
+    });
+
+    it('can update nodes', function () {
+      var attributes = {
+        foo: 'bar',
+        spam: 'eggs'
+      };
+
+      return gom.update(testNode, attributes).then(function () {
+        return gom.retrieve(testNode);
+      }).then(function (result) {
+        expect(result.node.uri).to.equal(testNode);
+
+        var entries = result.node.entries;
+        expect(entries).to.have.length(3);
+
+        expect(entries[1].attribute.node).to.equal(testNode);
+        expect(entries[1].attribute.name).to.equal('foo');
+        expect(entries[1].attribute.value).to.equal('bar');
+        expect(entries[2].attribute.node).to.equal(testNode);
+        expect(entries[2].attribute.name).to.equal('spam');
+        expect(entries[2].attribute.value).to.equal('eggs');
       });
     });
   });
