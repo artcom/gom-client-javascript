@@ -33,7 +33,7 @@ define([
   };
 
   Gom.prototype._postRequest = function (path, options) {
-    // theOpts.headers = { "X-Requested-With": "XMLHttpRequest" };
+    // options.headers = { "X-Requested-With": "XMLHttpRequest" };
     return this._send('POST', path, options);
   };
 
@@ -49,95 +49,59 @@ define([
     return payload;
   };
 
-  Gom.prototype._validateOpts = function (theOpts) {
-    theOpts = theOpts || {};
-
-    return theOpts;
-  };
-
-  Gom.prototype._addJSONParseOnSuccess = function (theOpts) {
-    // parse and deliver as JSON object
-
-    var originalSuccess = theOpts.success;
-    if(originalSuccess) {
-      theOpts.success = function(data, code, xhr) {
-        // if the content type starts with 'application/json'
-        var contentType = xhr.getResponseHeader('Content-Type') || '';
-        if(contentType.indexOf('application/json') === 0) {
-          originalSuccess(JSON.parse(xhr.responseText));
-        }
-        else {
-          originalSuccess(xhr.responseText);
-        }
-      };
-    }
-  };
-
   ////////////////////
   // Public Methods //
   ////////////////////
 
-  Gom.prototype.runScript= function(theScript, theOpts) {
-    var myOpts = this._validateOpts(theOpts);
-    myOpts.body = theScript;
-    myOpts.headers = {
-      'Content-Type': 'text/javascript'
-    };
+  Gom.prototype.runScript = function(script, options) {
+    options = options || {};
 
-    this._addJSONParseOnSuccess(myOpts);
-    return this._postRequest(Gom.SCRIPT_RUNNER_PATH, myOpts);
+    options.body = script;
+    options.headers = { 'Content-Type': 'text/javascript' };
+
+    return this._postRequest(Gom.SCRIPT_RUNNER_PATH, options);
   };
 
-  Gom.prototype.create = function(thePath, theOpts) {
-    var myOpts = this._validateOpts(theOpts);
+  Gom.prototype.create = function(path, options) {
+    options = options || {};
 
-    // prepare attributes
-    if ('attributes' in myOpts) {
-      myOpts.body = this._writePayload(myOpts.attributes);
-      myOpts.headers = {
-        'Content-Type': 'application/xml'
-      };
+    if (options.attributes) {
+      options.body = this._writePayload(options.attributes);
+      options.headers = { 'Content-Type': 'application/xml' };
     }
 
-    this._setRedirectHandling(myOpts);
-    return this._postRequest(thePath, myOpts);
+    return this._postRequest(path, options);
   };
 
-  Gom.prototype.retrieve = function(thePath, theOpts) {
-    var myOpts = this._validateOpts(theOpts);
-    this._addJSONParseOnSuccess(myOpts);
-
-    return this._getRequest(thePath, myOpts);
+  Gom.prototype.retrieve = function(path, options) {
+    return this._getRequest(path, options);
   };
 
-  Gom.prototype.update = function (thePath, theValue, theOpts) {
+  Gom.prototype.update = function (path, value, options) {
+    options = options || {};
+
     var payload;
-    if ((thePath.indexOf(':') >= 0)) { // isAttribute
+    if ((path.indexOf(':') >= 0)) { // isAttribute
       payload = '<?xml version="1.0" encoding="UTF-8"?>';
       payload += '<attribute type="string">';
-      payload += '<![CDATA[' + theValue + ']]>';
+      payload += '<![CDATA[' + value + ']]>';
       payload += '</attribute>';
     } else {
-      payload = this._writePayload(theValue);
+      payload = this._writePayload(value);
     }
 
-    var myOpts = this._validateOpts(theOpts);
-    myOpts.body = payload;
-    myOpts.headers = {
-      'Content-Type': 'application/xml'
-    };
+    options.body = payload;
+    options.headers = { 'Content-Type': 'application/xml' };
 
-    return this._putRequest(thePath, myOpts);
+    return this._putRequest(path, options);
   };
 
-  Gom.prototype.destroy = function (thePath, theOpts) {
-    var myOpts = this._validateOpts(theOpts);
-
-    return this._deleteRequest(thePath, myOpts);
+  Gom.prototype.destroy = function (path, options) {
+    return this._deleteRequest(path, options);
   };
 
-  Gom.prototype.determineIpAddress = function (theCallbacks) {
-    return this.retrieve('/gom/config/connection', theCallbacks);
+  Gom.prototype.determineIpAddress = function () {
+    return this.retrieve('/gom/config/connection');
   };
 
   return Gom;
