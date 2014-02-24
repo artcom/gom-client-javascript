@@ -13,7 +13,11 @@ define(function () {
       xhr.open(method, url);
 
       xhr.onload = function() {
-        if (xhr.status === 200) {
+        var successful =
+          xhr.status >= 200 && xhr.status < 300 ||
+          xhr.status === 304;
+
+        if (successful) {
           var response;
 
           if (isJsonResponse(xhr)) {
