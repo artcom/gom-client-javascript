@@ -1,9 +1,9 @@
 /* globals define */
 
-define([
-  'http-as-promised'
-], function (http) {
+define(function (require) {
   'use strict';
+
+  var http = require('http-as-promised');
 
   var Gom = function (theHost) {
     this._host = theHost;
