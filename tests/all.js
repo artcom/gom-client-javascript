@@ -57,5 +57,16 @@ define([
         expect(error.xhr.status).to.equal(404);
       }));
     });
+
+    it('can retrieve nodes', function () {
+      return gom.retrieve(testNode).then(function (result) {
+        expect(result.node.uri).to.equal(testNode);
+        expect(result.node.entries).to.have.length(1);
+
+        var attribute = result.node.entries[0];
+        expect(attribute.attribute.node).to.equal(testNode);
+        expect(attribute.attribute.value).to.equal('initial');
+      });
+    });
   });
 });
