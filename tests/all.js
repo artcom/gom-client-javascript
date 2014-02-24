@@ -50,8 +50,8 @@ define([
             }).then(function () {
                 // Retrieve is expected to fail, see below.
                 deferred.reject();
-            }).fail(deferred.callback(function (result) {
-                expect(result.status).to.equal(404);
+            }).catch(deferred.callback(function (error) {
+                expect(error.xhr.status).to.equal(404);
             }));
         });
     });
