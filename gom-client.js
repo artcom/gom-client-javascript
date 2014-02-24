@@ -50,25 +50,6 @@ define([
     return http.post(this._url(Gom.SCRIPT_RUNNER_PATH), options);
   };
 
-  Gom.prototype.create = function(path, options) {
-    options = this._initializeOptions(options);
-
-    options.headers['X-Requested-With'] = 'XMLHttpRequest';
-
-    if (options.attributes) {
-      options.body = this._writePayload(options.attributes);
-      options.headers['Content-Type'] = 'application/xml';
-    }
-
-    var _this = this;
-
-    return http.postXhr(this._url(path), options).then(function (xhr) {
-      var newNode = xhr.getResponseHeader('Location');
-
-      return _this.retrieve(newNode);
-    });
-  };
-
   Gom.prototype.retrieve = function(path, options) {
     return http.get(this._url(path), options);
   };
