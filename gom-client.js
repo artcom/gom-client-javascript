@@ -19,18 +19,6 @@ define([
     return this._host + path + '?format=json';
   };
 
-  Gom.prototype._writePayload = function (theAttributes) {
-    var payload = '<?xml version="1.0" encoding="UTF-8"?><node>';
-    for (var attrName in theAttributes) {
-      payload += '<attribute name="' + attrName + '">';
-      payload += '<![CDATA[' + theAttributes[attrName] + ']]>';
-      payload += '</attribute>';
-    }
-    payload += '</node>';
-
-    return payload;
-  };
-
   ////////////////////
   // Public Methods //
   ////////////////////
@@ -47,18 +35,24 @@ define([
   };
 
   Gom.prototype.update = function (path, value) {
-    var payload;
-    if ((path.indexOf(':') >= 0)) { // isAttribute
-      payload = '<?xml version="1.0" encoding="UTF-8"?>';
-      payload += '<attribute type="string">';
-      payload += '<![CDATA[' + value + ']]>';
-      payload += '</attribute>';
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>';
+
+    if ((path.indexOf(':') >= 0)) {
+      xml += '<attribute type="string"><![CDATA[' + value + ']]></attribute>';
     } else {
-      payload = this._writePayload(value);
+      xml += '<node>';
+
+      for (var attribute in value) {
+        xml += '<attribute name="' + attribute + '">';
+        xml += '<![CDATA[' + value[attribute] + ']]>';
+        xml += '</attribute>';
+      }
+
+      xml += '</node>';
     }
 
     return http.put(this._url(path), {
-      body: payload,
+      body: xml,
       headers: { 'Content-Type': 'application/xml' }
     });
   };
