@@ -5,8 +5,8 @@ define(function (require) {
 
   var http = require('http-as-promised');
 
-  var Gom = function (theHost) {
-    this._host = theHost;
+  var Gom = function (host) {
+    this._host = host;
   };
 
   Gom.SCRIPT_RUNNER_PATH = '/gom/script-runner';
