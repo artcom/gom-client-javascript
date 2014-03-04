@@ -1,14 +1,13 @@
 /* jshint expr: true */
 /* globals define */
 
-define([
-  'gom-client',
-  'intern!bdd',
-  'intern/chai!expect'
-], function (Gom, bdd, expect) {
+define(function (require) {
   'use strict';
 
-  var afterEach = bdd.afterEach,
+  var Gom = require('gom-client'),
+      bdd = require('intern!bdd'),
+      expect = require('intern/chai!expect'),
+      afterEach = bdd.afterEach,
       before = bdd.before,
       beforeEach = bdd.beforeEach,
       describe = bdd.describe,
