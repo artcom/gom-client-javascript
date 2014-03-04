@@ -62,7 +62,7 @@ define({
   },
 
   // Non-functional test suite(s) to run in each browser
-  suites: ['gom-client-javascript/tests/all'],
+  suites: ['gom-client-javascript/tests/gom-client-tests'],
 
   // Functional test suite(s) to run in each browser once non-functional tests are completed
   functionalSuites: [/* "gom-client-javascript/tests/functional" */],
