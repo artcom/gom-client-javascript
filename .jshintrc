@@ -4,8 +4,8 @@
    * =================
    */
 
-  // Define globals exposed by modern browsers.
-  "browser": true,
+  // Define globals exposed by node.js.
+  "node": true,
 
   /*
    * ENFORCING OPTIONS

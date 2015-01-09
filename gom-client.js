@@ -1,73 +1,74 @@
-/* globals define */
+'use strict';
 
-define(function (require) {
-  'use strict';
+var request = require('request-promise');
 
-  var http = require('http-as-promised');
+var Gom = module.exports = function (host) {
+  this._host = host;
+};
 
-  var Gom = function (host) {
-    this._host = host;
-  };
+Gom.SCRIPT_RUNNER_PATH = '/gom/script-runner';
 
-  Gom.SCRIPT_RUNNER_PATH = '/gom/script-runner';
+Gom.prototype.exists = function (path) {
+  return request.get({
+    url: this._url(path),
+    simple: false,
+    resolveWithFullResponse: true
+  }).then(function (response) {
+    return response.statusCode === 200;
+  });
+};
 
-  /////////////////////
-  // Private Members //
-  /////////////////////
+Gom.prototype.retrieve = function (path) {
+  return request.get({
+    url: this._url(path),
+    json: true
+  });
+};
 
-  Gom.prototype._url = function (path) {
-    return this._host + path + '?format=json';
-  };
+Gom.prototype.update = function (path, value) {
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>';
 
-  ////////////////////
-  // Public Methods //
-  ////////////////////
+  if ((path.indexOf(':') >= 0)) {
+    xml += '<attribute type="string"><![CDATA[' + value + ']]></attribute>';
+  } else {
+    xml += '<node>';
 
-  Gom.prototype.runScript = function(script) {
-    return http.post(this._url(Gom.SCRIPT_RUNNER_PATH), {
-      body: script,
-      headers: { 'Content-Type': 'text/javascript' }
-    });
-  };
-
-  Gom.prototype.retrieve = function(path) {
-    return http.get(this._url(path));
-  };
-
-  Gom.prototype.update = function (path, value) {
-    var xml = '<?xml version="1.0" encoding="UTF-8"?>';
-
-    if ((path.indexOf(':') >= 0)) {
-      xml += '<attribute type="string"><![CDATA[' + value + ']]></attribute>';
-    } else {
-      xml += '<node>';
-
-      for (var attribute in value) {
-        xml += '<attribute name="' + attribute + '">';
-        xml += '<![CDATA[' + value[attribute] + ']]>';
-        xml += '</attribute>';
-      }
-
-      xml += '</node>';
+    for (var attribute in value) {
+      xml += '<attribute name="' + attribute + '">';
+      xml += '<![CDATA[' + value[attribute] + ']]>';
+      xml += '</attribute>';
     }
 
-    return http.put(this._url(path), {
-      body: xml,
-      headers: { 'Content-Type': 'application/xml' }
-    });
-  };
+    xml += '</node>';
+  }
 
-  Gom.prototype.destroy = function (path) {
-    return http.delete(this._url(path)).catch(function (error) {
-      if (error.xhr.status !== 404) {
-        throw error;
-      }
-    });
-  };
+  return request.put({
+    url: this._url(path),
+    body: xml,
+    headers: { 'Content-Type': 'application/xml' }
+  });
+};
 
-  Gom.prototype.determineIpAddress = function () {
-    return this.retrieve('/gom/config/connection');
-  };
+Gom.prototype.destroy = function (path) {
+  return request.del({
+    url: this._url(path),
+    json: true,
+    simple: false
+  }).then(function (result) {
+    if (result.error && result.error.status !== 'not_found') {
+      throw result.error;
+    }
+  });
+};
 
-  return Gom;
-});
+Gom.prototype.runScript = function (script) {
+  return request.post({
+    url: this._url(Gom.SCRIPT_RUNNER_PATH),
+    body: script,
+    headers: { 'Content-Type': 'text/javascript' }
+  });
+};
+
+Gom.prototype._url = function (path) {
+  return this._host + path + '?format=json';
+};
