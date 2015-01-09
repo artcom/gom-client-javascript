@@ -1,6 +1,6 @@
 {
-  "name": "gom-client-javascript",
-  "version": "0.4.0",
+  "name": "gom-client",
+  "version": "1.0.0",
   "description": "JavaScript GOM Client",
   "main": "gom-client.js",
   "directories": {
