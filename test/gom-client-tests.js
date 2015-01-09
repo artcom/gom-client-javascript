@@ -102,4 +102,15 @@ describe('GOM Client', function () {
       expect(exists).to.be.false();
     });
   });
+
+  it ('can run scripts', function () {
+    var scriptResult = 'SCRIPT_RESULT';
+    var script = ['response.body = "' + scriptResult + '";',
+                  'response.content_type = "text/plain"',
+                  '"200 OK"'].join('\n');
+
+    return gom.runScript(script).then(function (result) {
+      expect(result).to.equal(scriptResult);
+    });
+  });
 });
